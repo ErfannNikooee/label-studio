@@ -27,3 +27,5 @@ export { ReactComponent as IconUpload } from './upload.svg';
 export { ReactComponent as LsPencil } from './pencil.svg';
 export { ReactComponent as IconInfoOutline } from './info-outline.svg';
 export { ReactComponent as IconSpark } from './spark.svg'
+export { ReactComponent as IconGroup } from './group.svg'
+
