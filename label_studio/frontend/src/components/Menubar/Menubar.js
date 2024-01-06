@@ -201,7 +201,7 @@ export const Menubar = ({
                 />
                 <Menu.Item
                   label="Group"
-                  to="/organization"
+                  to="/group"
                   icon={<IconGroup/>}
                   data-external
                   exact
