@@ -20,7 +20,7 @@ class GroupMember(GroupMemberMixin, models.Model):
         'groups.Group', on_delete=models.CASCADE, help_text='Group ID'
     )
 
-    is_admin = models.BooleanField()
+    admin = models.BooleanField()
 
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
@@ -38,9 +38,9 @@ class GroupMember(GroupMemberMixin, models.Model):
     @property
     def is_owner(self):
         return self.user.id == self.organization.created_by.id
-    # @property
-    # def is_admin(self):
-    #     return self.user.id == self.group.created_by.id
+    @property
+    def is_admin(self):
+        return self.user.admin
 
     
 
@@ -49,7 +49,7 @@ class GroupMember(GroupMemberMixin, models.Model):
 
 GroupMixin = load_func(settings.ROUP_MIXIN)
 class Group(GroupMixin, models.Model):
-    title = models.CharField(_('group title'),max_length=500, null=False)
+    name = models.CharField(_('group name'),max_length=500, null=False)
 
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through=GroupMember)
 
@@ -69,9 +69,9 @@ class Group(GroupMixin, models.Model):
         ordering = ['pk']
 
     @classmethod
-    def create_group(cls, created_by=None, title='Your Group'):
+    def create_group(cls, created_by=None, name='Your Group'):
         _create_organization = load_func(settings.CREATE_GROUP)
-        return _create_organization(title=title, created_by=created_by)
+        return _create_organization(name=name, created_by=created_by)
     
     def has_user(self, user):
         return self.users.filter(pk=user.pk).exists()
