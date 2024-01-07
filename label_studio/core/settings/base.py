@@ -200,6 +200,7 @@ INSTALLED_APPS = [
     'drf_generators',
     'core',
     'users',
+    'groups',
     'organizations',
     'data_import',
     'data_export',
@@ -511,6 +512,7 @@ IO_STORAGES_IMPORT_LINK_NAMES = [
 ]
 
 CREATE_ORGANIZATION = 'organizations.functions.create_organization'
+CREATE_GROUP = "groups.functions.create_group"
 SAVE_USER = 'users.functions.save_user'
 POST_PROCESS_REIMPORT = 'core.utils.common.empty'
 USER_SERIALIZER = 'users.serializers.BaseUserSerializer'
