@@ -37,7 +37,7 @@ class GroupMember(GroupMemberMixin, models.Model):
 
     @property
     def is_owner(self):
-        return self.user.id == self.organization.created_by.id
+        return self.user.id == self.group.created_by.id
     @property
     def is_admin(self):
         return self.user.admin
@@ -47,17 +47,17 @@ class GroupMember(GroupMemberMixin, models.Model):
     class Meta:
         ordering = ['pk']
 
-GroupMixin = load_func(settings.ROUP_MIXIN)
+GroupMixin = load_func(settings.GROUP_MIXIN)
 class Group(GroupMixin, models.Model):
     name = models.CharField(_('group name'),max_length=500, null=False)
 
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='groups', through=GroupMember)
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='members', through=GroupMember)
 
-    created_by = models.OneToOneField(
+    created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        related_name='group',
+        related_name='created_groups',
         verbose_name=_('created_by'),)
     
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
@@ -69,9 +69,9 @@ class Group(GroupMixin, models.Model):
         ordering = ['pk']
 
     @classmethod
-    def create_group(cls, created_by=None, name='Your Group'):
-        _create_organization = load_func(settings.CREATE_GROUP)
-        return _create_organization(name=name, created_by=created_by)
+    def create_group(cls, name,created_by):
+        _create_group = load_func(settings.CREATE_GROUP)
+        return _create_group(name=name, created_by=created_by)
     
     def has_user(self, user):
         return self.users.filter(pk=user.pk).exists()
@@ -80,21 +80,18 @@ class Group(GroupMixin, models.Model):
         return GroupMember.objects.filter(user=user, group=self, deleted_at__isnull=False).exists()
     
     def has_permission(self, user):
-        return GroupMember.objects.filter(user=user, organization=self, deleted_at__isnull=True).exists()
+        return GroupMember.objects.filter(user=user, group=self, deleted_at__isnull=True).exists()
 
     def add_user(self, user):
         if self.users.filter(pk=user.pk).exists():
-            logger.debug('User already exists in organization.')
+            logger.debug('User already exists in group.')
             return
 
         with transaction.atomic():
-            om = GroupMember(user=user, organization=self)
-            om.save()
+            gm = GroupMember(user=user, group=self)
+            gm.save()
 
-            return om
+            return gm
 
     def remove_user(self, user):
         GroupMember.objects.filter(user=user, group=self).delete()
-        if user.active_organization_id == self.id:
-            user.active_organization = user.organizations.filter(organizationmember__deleted_at__isnull=True).first()
-            user.save(update_fields=['active_organization'])
