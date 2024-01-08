@@ -147,6 +147,21 @@ export const TipsCollection: Record<string, Tip[]> = {
       },
     }
   }],
+  groupsPage:[
+    {
+    title: "Your at the Group Management section",
+    content: "Here you can create, manage and delete group.",
+    closable: true,
+    link: {
+      label: "additional information about label-studio",
+      url: "https://docs.humansignal.com/guide",
+      params: {
+        experiment: "organization_page_tip",
+        treatment: "group_management",
+      },
+    }
+  }
+],
   projectSettings: [{
     title: "Did you know?",
     content: "You can automatically label and sort tasks by prediction score to maximize labeling efficiency in Label Studio Enterprise.",

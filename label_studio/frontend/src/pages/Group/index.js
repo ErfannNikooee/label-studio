@@ -2,9 +2,9 @@
 import React from 'react';
 import { SidebarMenu } from '../../components/SidebarMenu/SidebarMenu';
 import { PeoplePage } from './PeoplePage/PeoplePage';
-// import { WebhookPage } from '../WebhookPage/WebhookPage';
+import { WebhookPage } from '../WebhookPage/WebhookPage';
 
-// const ALLOW_ORGANIZATION_WEBHOOKS = window.APP_SETTINGS.flags?.allow_organization_webhooks;
+const ALLOW_ORGANIZATION_WEBHOOKS = window.APP_SETTINGS.flags?.allow_organization_webhooks;
 
 
 const MenuLayout = ({ children, ...routeProps }) => {
@@ -23,9 +23,9 @@ const MenuLayout = ({ children, ...routeProps }) => {
   );
 };
 
-const organizationPages = {};
+const groupPages = {};
 if (ALLOW_ORGANIZATION_WEBHOOKS){
-  organizationPages[WebhookPage] = WebhookPage;
+  groupPages[WebhookPage] = WebhookPage;
 }
 
 export const GroupPage = {
@@ -34,5 +34,5 @@ export const GroupPage = {
   exact: true,
   layout: MenuLayout,
   component: PeoplePage,
-  pages: organizationPages,
+  pages: groupPages,
 };

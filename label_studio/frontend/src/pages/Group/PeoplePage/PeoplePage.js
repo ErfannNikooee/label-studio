@@ -11,10 +11,11 @@ import { useConfig } from "../../../providers/ConfigProvider";
 import { Block, Elem } from "../../../utils/bem";
 import { FF_LSDV_E_297, isFF } from "../../../utils/feature-flags";
 import { copyText } from "../../../utils/helpers";
-import "./PeopleInvitation.styl";
+// import "./PeopleInvitation.styl";
 import { PeopleList } from "./PeopleList";
 import "./PeoplePage.styl";
 import { SelectedUser } from "./SelectedUser";
+import { shallow } from "enzyme";
 
 const InvitationModal = ({ link }) => {
   return (
@@ -32,9 +33,24 @@ const InvitationModal = ({ link }) => {
   );
 };
 
+const GroupModal = () => {
+  return (
+    <Block name="group">
+      <Input
+        style={{ width: '100%' }}
+      />
+
+      <Description style={{ width: '70%', marginTop: 16 }}>
+        Enter your group's name
+      </Description>
+    </Block>
+  );
+};
+
 export const PeoplePage = () => {
   const api = useAPI();
   const inviteModal = useRef();
+  const groupModal = useRef();
   const config = useConfig();
   const [selectedUser, setSelectedUser] = useState(null);
 
@@ -46,68 +62,102 @@ export const PeoplePage = () => {
     localStorage.setItem('selectedUser', user?.id);
   }, [setSelectedUser]);
 
-  const setInviteLink = useCallback((link) => {
-    const hostname = config.hostname || location.origin;
+  // const setInviteLink = useCallback((link) => {
+  //   const hostname = config.hostname || location.origin;
 
-    setLink(`${hostname}${link}`);
-  }, [config, setLink]);
+  //   setLink(`${hostname}${link}`);
+  // }, [config, setLink]);
 
-  const updateLink = useCallback(() => {
-    api.callApi('resetInviteLink').then(({ invite_url }) => {
-      setInviteLink(invite_url);
-    });
-  }, [setInviteLink]);
-
-  const inviteModalProps = useCallback((link) => ({
-    title: "Invite people",
+  // const updateLink = useCallback(() => {
+  //   api.callApi('resetInviteLink').then(({ invite_url }) => {
+  //     setInviteLink(invite_url);
+  //   });
+  // }, [setInviteLink]);
+  const groupModalProps = useCallback (() => ({
+    title: "Create Group",
     style: { width: 640, height: 472 },
     body: () => (
-      <InvitationModal link={link} />
+      <GroupModal />
     ),
     footer: () => {
-      const [copied, setCopied] = useState(false);
-
-      const copyLink = useCallback(() => {
-        setCopied(true);
-        copyText(link);
-        setTimeout(() => setCopied(false), 1500);
-      }, []);
 
       return (
         <Space spread>
           <Space>
-            <Button style={{ width: 170 }} onClick={() => updateLink()}>
-              Reset Link
-            </Button>
+
           </Space>
           <Space>
-            <Button primary style={{ width: 170 }} onClick={copyLink}>
-              {copied ? "Copied!" : "Copy link"}
+            <Button primary style={{ width: 170 }} >
+              Create
             </Button>
           </Space>
         </Space>
       );
     },
     bareFooter: true,
-  }), []);
 
-  const showInvitationModal = useCallback(() => {
-    inviteModal.current = modal(inviteModalProps(link));
-  }, [inviteModalProps, link]);
+  }),[])
+
+  const showGroupModal = useCallback(() => {
+    groupModal.current = modal(groupModalProps());
+  }, [groupModalProps])
+
+
+  // const inviteModalProps = useCallback((link) => ({
+  //   title: "Invite people",
+  //   style: { width: 640, height: 472 },
+  //   body: () => (
+  //     <InvitationModal link={link} />
+  //   ),
+  //   footer: () => {
+  //     const [copied, setCopied] = useState(false);
+
+  //     const copyLink = useCallback(() => {
+  //       setCopied(true);
+  //       copyText(link);
+  //       setTimeout(() => setCopied(false), 1500);
+  //     }, []);
+
+  //     return (
+  //       <Space spread>
+  //         <Space>
+  //           <Button style={{ width: 170 }} onClick={() => updateLink()}>
+  //             Reset Link
+  //           </Button>
+  //         </Space>
+  //         <Space>
+  //           <Button primary style={{ width: 170 }} onClick={copyLink}>
+  //             {copied ? "Copied!" : "Copy link"}
+  //           </Button>
+  //         </Space>
+  //       </Space>
+  //     );
+  //   },
+  //   bareFooter: true,
+  // }), []);
+    
+
+  // const showInvitationModal = useCallback(() => {
+  //   inviteModal.current = modal(inviteModalProps(link));
+  // }, [inviteModalProps, link]);
 
   const defaultSelected = useMemo(() => {
     return localStorage.getItem('selectedUser');
   }, []);
 
   useEffect(() => {
-    api.callApi("inviteLink").then(({ invite_url }) => {
-      setInviteLink(invite_url);
-    });
-  }, []);
+    groupModal.current?.update(groupModalProps())
+  }, [])
 
-  useEffect(() => {
-    inviteModal.current?.update(inviteModalProps(link));
-  }, [link]);
+  // useEffect(() => {
+  //   api.callApi("inviteLink").then(({ invite_url }) => {
+  //     setInviteLink(invite_url);
+  //   });
+  // }, []);
+
+  // useEffect(() => {
+  //   inviteModal.current?.update(inviteModalProps(link));
+  // }, [link]);
 
   return (
     <Block name="people">
@@ -116,8 +166,8 @@ export const PeoplePage = () => {
           <Space></Space>
 
           <Space>
-            <Button icon={<LsPlus />} primary onClick={showInvitationModal}>
-              Add People
+            <Button icon={<LsPlus />} primary onClick={showGroupModal}>
+              Create Group
             </Button>
           </Space>
         </Space>
@@ -135,7 +185,7 @@ export const PeoplePage = () => {
             onClose={() => selectUser(null)}
           />
         ) : isFF(FF_LSDV_E_297) && (
-          <HeidiTips collection="organizationPage" />
+          <HeidiTips collection="groupsPage" />
         )}
       </Elem>
     </Block>
