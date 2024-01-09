@@ -1,6 +1,13 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
-from django.http import HttpResponse
 
-def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
-# Create your views here.
+
+@login_required
+def group_list(request):
+    return render(request, 'groups/people_list.html')
+
+
+@login_required
+def simple_view(request):
+    return render(request, 'groups/people_list.html')
+
