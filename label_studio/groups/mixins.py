@@ -2,6 +2,7 @@ class GroupMixin:
     @property
     def active_members(self):
         return self.members
+        # return self.users
 
 
 class GroupMemberMixin:

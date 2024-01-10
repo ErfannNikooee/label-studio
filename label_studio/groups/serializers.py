@@ -30,7 +30,10 @@ class UserSerializerWithProjects(UserSerializer):
     #         return None
 
     #     current_user = self.context['request'].user
-    #     return user.created_projects.filter(group=current_user.active_organization).values('id', 'title')
+    #     user_group = current_user.objects.get(self.context['request'].group_id)
+
+
+    #     return user.created_projects.filter(group=user_group).values('id', 'title')
 
     # def get_contributed_to_projects(self, user):
     #     if not self.context.get('contributed_to_projects', False):
@@ -51,10 +54,10 @@ class GroupMemberUserSerializer(DynamicFieldsMixin, serializers.ModelSerializer)
     """Adds all user properties"""
 
     user = UserSerializerWithProjects()
-
+    group = GroupSerializer()
     class Meta:
         model = GroupMember
-        fields = ['id', 'organization', 'user']
+        fields = ['id', 'user', 'group']
 class GroupsParamsSerializer(serializers.Serializer):
     active = serializers.BooleanField(required=False, default=False)
     contributed_to_projects = serializers.BooleanField(required=False, default=False)
