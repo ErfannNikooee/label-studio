@@ -28,6 +28,20 @@ from users.models import User
 from label_studio.core.permissions import ViewClassPermission, all_permissions
 from label_studio.core.utils.params import bool_from_request
 
+logger = logging.getLogger(__name__)
+
+HasObjectPermission = load_func(settings.MEMBER_PERM)
+
+@method_decorator(
+    name='get',
+    decorator=swagger_auto_schema(
+        tags=['Groups'],
+        operation_summary='List your groups',
+        operation_description="""
+        Return a list of the groups you've created or that you have access to.
+        """,
+    ),
+)
 class GroupListAPI(generics.ListCreateAPIView):
     queryset = Group.objects.all()
     parser_classes = (JSONParser, FormParser, MultiPartParser)
@@ -99,7 +113,7 @@ class GroupMemberListAPI(generics.ListAPIView):
         }
 
     def get_queryset(self):
-        org = generics.get_object_or_404(self.request.user.organizations, pk=self.kwargs[self.lookup_field])
+        group = generics.get_object_or_404(self.request.user.groups, pk=self.kwargs[self.lookup_field])
         if flag_set('fix_backend_dev_3134_exclude_deactivated_users', self.request.user):
             serializer = GroupsParamsSerializer(data=self.request.GET)
             serializer.is_valid(raise_exception=True)
@@ -107,10 +121,100 @@ class GroupMemberListAPI(generics.ListAPIView):
 
             # return only active users (exclude DISABLED and NOT_ACTIVATED)
             if active:
-                return org.active_members.order_by('user__username')
+                return group.active_members.order_by('user__username')
 
-            # organization page to show all members
-            return org.members.order_by('user__username')
+            # group page to show all members
+            return group.members.order_by('user__username')
         else:
-            return org.members.order_by('user__username')
+            return group.members.order_by('user__username')
+
+@method_decorator(
+    name='delete',
+    decorator=swagger_auto_schema(
+        tags=['Groups'],
+        operation_summary='Soft delete an group member',
+        operation_description='Soft delete a member from the group.',
+        manual_parameters=[
+            openapi.Parameter(
+                name='pk',
+                type=openapi.TYPE_INTEGER,
+                in_=openapi.IN_PATH,
+                description='A unique integer value identifying this group.',
+            ),
+            openapi.Parameter(
+                name='user_pk',
+                type=openapi.TYPE_INTEGER,
+                in_=openapi.IN_PATH,
+                description='A unique integer value identifying the user to be deleted from the group.',
+            ),
+        ],
+        responses={
+            204: 'Member deleted successfully.',
+            405: 'User cannot soft delete self.',
+            404: 'Member not found',
+        },
+    ),
+)
+class GroupMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroyAPIView):
+    permission_required = ViewClassPermission(
+        DELETE=all_permissions.groups_change,
+    )
+    parent_queryset = Group.objects.all()
+    parser_classes = (JSONParser, FormParser, MultiPartParser)
+    permission_classes = (IsAuthenticated, HasObjectPermission)
+    serializer_class = GroupMemberUserSerializer  # Assuming this is the right serializer
+    http_method_names = ['delete']
+
+    def delete(self, request, pk=None, user_pk=None):
+        group = self.get_parent_object()
+        # if group != request.user.active_organization:
+        #     raise PermissionDenied('You can delete members only for your current active organization')
+
+        user = get_object_or_404(User, pk=user_pk)
+        member = get_object_or_404(GroupMember, user=user, group=group)
+        if member.deleted_at is not None:
+            raise NotFound('Member not found')
+
+        if member.user_id == request.user.id:
+            return Response({'detail': 'User cannot soft delete self'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        member.soft_delete()
+        return Response(status=204)  # 204 No Content is a common HTTP status for successful delete requests
+
+
+@method_decorator(
+    name='get',
+    decorator=swagger_auto_schema(
+        tags=['Groups'],
+        operation_summary=' Get group settings',
+        operation_description='Retrieve the settings for a specific group by ID.',
+    ),
+)
+@method_decorator(
+    name='patch',
+    decorator=swagger_auto_schema(
+        tags=['Groups'],
+        operation_summary='Update roup settings',
+        operation_description='Update the settings for a specific group by ID.',
+    ),
+)
+class GroupAPI(generics.RetrieveUpdateAPIView):
+
+    parser_classes = (JSONParser, FormParser, MultiPartParser)
+    queryset = Group.objects.all()
+    permission_required = all_permissions.groups_change
+    serializer_class = GroupSerializer
+
+    redirect_route = 'groups-dashboard'
+    redirect_kwarg = 'pk'
+
+    def get(self, request, *args, **kwargs):
+        return super(GroupAPI, self).get(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return super(GroupAPI, self).patch(request, *args, **kwargs)
+
+    @swagger_auto_schema(auto_schema=None)
+    def put(self, request, *args, **kwargs):
+        return super(GroupAPI, self).put(request, *args, **kwargs)
 
