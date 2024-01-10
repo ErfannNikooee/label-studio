@@ -9,7 +9,7 @@
   {
     breadcrumbs: [
       {
-        title: "People"
+        title: "Groups"
       }
     ],
   }
@@ -106,7 +106,7 @@
       const API = {
         users: {
           getAll() {
-            return fetch("/api/groups/1/memberships")
+            return fetch("/api/group/1/memberships")
               .then(data => data.json())
               .then(data => data.map(u => Object.assign(u.user, {
                 member_id: u.id,

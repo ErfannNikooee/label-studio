@@ -29,7 +29,7 @@ if (ALLOW_ORGANIZATION_WEBHOOKS){
 }
 
 export const GroupPage = {
-  title: "Group",
+  title: "Groups",
   path: "/group",
   exact: true,
   layout: MenuLayout,
