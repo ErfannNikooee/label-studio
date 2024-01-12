@@ -11,6 +11,11 @@ export const API_CONFIG = {
     inviteLink: "/invite",
     resetInviteLink: "POST:/invite/reset-token",
 
+    // Group
+    groups :"/group",
+    groupmembers :"/group/:pk/memberships",
+    createGroup :"POST:/group",
+
     // Project
     projects: "/projects",
     project: "/projects/:pk",
