@@ -56,7 +56,7 @@ class GroupListAPI(generics.ListCreateAPIView):
 
     def filter_queryset(self, queryset):
         return queryset.filter(
-            groupmember__in=self.request.user.om_through.filter(deleted_at__isnull=True)
+            groupmember__in=self.request.user.gm_through.filter(deleted_at__isnull=True)
         ).distinct()
 
     def get(self, request, *args, **kwargs):
@@ -70,8 +70,7 @@ class GroupMemberPagination(PageNumberPagination):
     page_size = 20
     page_size_query_param = 'page_size'
 
-    def get_page_size(self, request):
-        # emulate "unlimited" page_size
+    def get_page_size(self, request): 
         if (
             self.page_size_query_param in request.query_params
             and request.query_params[self.page_size_query_param] == '-1'
@@ -167,8 +166,8 @@ class GroupMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroyAPIView
 
     def delete(self, request, pk=None, user_pk=None):
         group = self.get_parent_object()
-        # if group != request.user.active_organization:
-        #     raise PermissionDenied('You can delete members only for your current active organization')
+        if group != request.user.active_organization:
+            raise PermissionDenied('You can delete members only for your current active organization')
 
         user = get_object_or_404(User, pk=user_pk)
         member = get_object_or_404(GroupMember, user=user, group=group)
@@ -194,7 +193,7 @@ class GroupMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroyAPIView
     name='patch',
     decorator=swagger_auto_schema(
         tags=['Groups'],
-        operation_summary='Update roup settings',
+        operation_summary='Update group settings',
         operation_description='Update the settings for a specific group by ID.',
     ),
 )
