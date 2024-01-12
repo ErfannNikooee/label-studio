@@ -106,7 +106,8 @@
       const API = {
         users: {
           getAll() {
-            return fetch("/api/group/1/memberships")
+            {% comment %} return fetch("/api/group/1/memberships") {% endcomment %}
+            return fetch("/api/group")
               .then(data => data.json())
               .then(data => data.map(u => Object.assign(u.user, {
                 member_id: u.id,
