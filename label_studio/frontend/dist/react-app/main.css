@@ -4463,33 +4463,33 @@ body {
   background-color: #f1f1f1;
 }
 
-.ls-people-list {
+.ls-group-list {
   width: 100%;
   min-width: 650px;
   font-size: 16px;
 }
-.ls-people-list__wrapper {
+.ls-group-list__wrapper {
   border-radius: 4px;
   box-shadow: 0 0 0 1px rgba(0,0,0,0.15) inset;
 }
-.ls-people-list__loading {
+.ls-group-list__loading {
   width: 100%;
   display: flex;
   min-height: 250px;
   justify-content: center;
   align-items: center;
 }
-.ls-people-list__users {
+.ls-group-list__users {
   width: 100%;
   text-align: left;
   border-collapse: collapse;
 }
-.ls-people-list__header {
+.ls-group-list__header {
   font-weight: 500;
   display: flex;
 }
-.ls-people-list__column,
-.ls-people-list__field {
+.ls-group-list__column,
+.ls-group-list__field {
   z-index: 2;
   height: 48px;
   padding: 0 10px;
@@ -4500,44 +4500,44 @@ body {
   align-items: center;
   font: 16px/normal 'Roboto';
 }
-.ls-people-list__column.ls-last-activity,
-.ls-people-list__field.ls-last-activity {
+.ls-group-list__column.ls-last-activity,
+.ls-group-list__field.ls-last-activity {
   color: rgba(0,0,0,0.4);
 }
-.ls-people-list__column {
+.ls-group-list__column {
   font-weight: 500;
   background: none;
 }
-.ls-people-list__field.ls-avatar,
-.ls-people-list__column.ls-avatar {
+.ls-group-list__field.ls-avatar,
+.ls-group-list__column.ls-avatar {
   width: 28px;
   box-sizing: content-box;
 }
-.ls-people-list__field.ls-name,
-.ls-people-list__column.ls-name {
+.ls-group-list__field.ls-name,
+.ls-group-list__column.ls-name {
   flex: 1;
 }
-.ls-people-list__field.ls-email,
-.ls-people-list__column.ls-email {
+.ls-group-list__field.ls-email,
+.ls-group-list__column.ls-email {
   width: 200px;
 }
-.ls-people-list__field.ls-last-activity,
-.ls-people-list__column.ls-last-activity {
+.ls-group-list__field.ls-last-activity,
+.ls-group-list__column.ls-last-activity {
   width: 160px;
 }
-.ls-people-list__user {
+.ls-group-list__user {
   cursor: pointer;
   display: flex;
 }
-.ls-people-list__user:nth-child(odd):not(.ls-people-list__user_active) {
+.ls-group-list__user:nth-child(odd):not(.ls-group-list__user_active) {
   background-color: rgba(0,0,0,0.03);
 }
-.ls-people-list__user_active {
+.ls-group-list__user_active {
   position: relative;
   background-color: #fff;
 }
-.ls-people-list__user_active::before,
-.ls-people-list__user_active::after {
+.ls-group-list__user_active::before,
+.ls-group-list__user_active::after {
   top: 0;
   bottom: 0;
   left: -1px;
@@ -4545,29 +4545,29 @@ body {
   display: block;
   position: absolute;
 }
-.ls-people-list__user_active::after {
+.ls-group-list__user_active::after {
   z-index: 1;
   background-color: #fff;
   width: calc(100% + 22px);
   box-shadow: inset 2px 0 0 #000, 1px 0 0 1px rgba(0,0,0,0.15) inset;
 }
-.ls-people-list__user_active::before {
+.ls-group-list__user_active::before {
   z-index: 0;
   height: 100%;
   width: calc(100% + 22px);
 }
 
-.ls-people__controls {
+.ls-group__controls {
   padding: 16px 0;
 }
-.ls-people__content {
+.ls-group__content {
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-template-rows: min-content;
   align-items: flex-start;
   grid-gap: 20px;
 }
-.ls-people .ls-heidy-tip {
+.ls-group .ls-heidy-tip {
   max-width: 450px;
 }
 

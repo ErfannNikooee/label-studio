@@ -12,26 +12,11 @@ import { Block, Elem } from "../../../utils/bem";
 import { FF_LSDV_E_297, isFF } from "../../../utils/feature-flags";
 import { copyText } from "../../../utils/helpers";
 // import "./PeopleInvitation.styl";
-import { PeopleList } from "./PeopleList";
-import "./PeoplePage.styl";
+import { GroupList} from "./GroupList";
+import "./GroupPage.styl";
 import { SelectedUser } from "./SelectedUser";
 import { shallow } from "enzyme";
 
-const InvitationModal = ({ link }) => {
-  return (
-    <Block name="invite">
-      <Input
-        value={link}
-        style={{ width: '100%' }}
-        readOnly
-      />
-
-      <Description style={{ width: '70%', marginTop: 16 }}>
-        Invite people to join your Label Studio instance. People that you invite have full access to all of your projects. <a href="https://labelstud.io/guide/signup.html">Learn more</a>.
-      </Description>
-    </Block>
-  );
-};
 
 const GroupModal = () => {
   return (
@@ -47,7 +32,7 @@ const GroupModal = () => {
   );
 };
 
-export const PeoplePage = () => {
+export const GroupPage = () => {
   const api = useAPI();
   const inviteModal = useRef();
   const groupModal = useRef();
@@ -160,7 +145,7 @@ export const PeoplePage = () => {
   // }, [link]);
 
   return (
-    <Block name="people">
+    <Block name="group">
       <Elem name="controls">
         <Space spread>
           <Space></Space>
@@ -173,7 +158,7 @@ export const PeoplePage = () => {
         </Space>
       </Elem>
       <Elem name="content">
-        <PeopleList
+        <GroupList
           selectedUser={selectedUser}
           defaultSelected={defaultSelected}
           onSelect={(user) => selectUser(user)}
@@ -192,5 +177,5 @@ export const PeoplePage = () => {
   );
 };
 
-PeoplePage.title = "People";
-PeoplePage.path = "/";
+GroupPage.title = "Group";
+GroupPage.path = "/";

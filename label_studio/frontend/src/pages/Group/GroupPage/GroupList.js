@@ -6,10 +6,10 @@ import { useAPI } from "../../../providers/ApiProvider";
 import { Block, Elem } from "../../../utils/bem";
 import { isDefined } from "../../../utils/helpers";
 import { useUpdateEffect } from "../../../utils/hooks";
-import './PeopleList.styl';
+import './GroupList.styl';
 import { CopyableTooltip } from '../../../components/CopyableTooltip/CopyableTooltip';
 
-export const PeopleList = ({ onSelect, selectedUser, defaultSelected }) => {
+export const GroupList = ({ onSelect, selectedUser, defaultSelected }) => {
   const api = useAPI();
   const [usersList, setUsersList] = useState();
   const [currentPage] = usePage('page', 1);
@@ -56,7 +56,7 @@ export const PeopleList = ({ onSelect, selectedUser, defaultSelected }) => {
 
   return (
     <>
-      <Block name="people-list">
+      <Block name="group-list">
         <Elem name="wrapper">
 
           {usersList ? (

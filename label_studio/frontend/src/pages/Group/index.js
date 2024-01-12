@@ -1,14 +1,14 @@
 
 import React from 'react';
 import { SidebarMenu } from '../../components/SidebarMenu/SidebarMenu';
-import { PeoplePage } from './PeoplePage/PeoplePage';
+import { GroupPage } from './GroupPage/GroupPage';
 import { WebhookPage } from '../WebhookPage/WebhookPage';
 
 const ALLOW_ORGANIZATION_WEBHOOKS = window.APP_SETTINGS.flags?.allow_organization_webhooks;
 
 
 const MenuLayout = ({ children, ...routeProps }) => {
-  let menuItems = [PeoplePage];
+  let menuItems = [GroupPage];
   if (ALLOW_ORGANIZATION_WEBHOOKS){
     menuItems.push(
       WebhookPage,
@@ -28,11 +28,11 @@ if (ALLOW_ORGANIZATION_WEBHOOKS){
   groupPages[WebhookPage] = WebhookPage;
 }
 
-export const GroupPage = {
+export const GroupsPage = {
   title: "Groups",
   path: "/group",
   exact: true,
   layout: MenuLayout,
-  component: PeoplePage,
+  component: GroupPage,
   pages: groupPages,
 };
