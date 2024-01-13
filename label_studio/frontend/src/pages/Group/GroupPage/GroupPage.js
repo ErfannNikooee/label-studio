@@ -38,6 +38,7 @@ export const GroupPage = () => {
   const groupModal = useRef();
   const config = useConfig();
   const [selectedUser, setSelectedUser] = useState(null);
+  const [groupName,setGroupname] = useState(null)
 
   const [link, setLink] = useState();
 
@@ -72,7 +73,7 @@ export const GroupPage = () => {
 
           </Space>
           <Space>
-            <Button primary style={{ width: 170 }} >
+            <Button primary style={{ width: 170 }} onClick={onCreate} >
               Create
             </Button>
           </Space>
@@ -86,6 +87,21 @@ export const GroupPage = () => {
   const showGroupModal = useCallback(() => {
     groupModal.current = modal(groupModalProps());
   }, [groupModalProps])
+
+  const onCreate = React.useCallback(async () => {
+    setWaitingStatus(true);
+    const response = await api.callApi('createGroup', {
+      params: {
+        pk: user.id,
+      },
+    });
+
+    setWaitingStatus(false);
+
+    if (response !== null) {
+      history.push(`/group/${response.id}/members`);
+    }
+  }, [project, projectBody, finishUpload]);
 
 
   // const inviteModalProps = useCallback((link) => ({
