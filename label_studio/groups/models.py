@@ -53,6 +53,10 @@ class Group(GroupMixin, models.Model):
 
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='members', through=GroupMember)
 
+    description = models.TextField(
+        _('description'), blank=True, null=True, default='', help_text='Project description'
+    )
+    
     created_by = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
