@@ -15,6 +15,8 @@ export const API_CONFIG = {
     groups :"/group",
     groupmembers :"/group/:pk/memberships",
     createGroup :"POST:/group",
+    updateGroup:"PATCH:/group/:pk",
+    deleteGroup:"DELETE:/group/:pk",
 
     // Project
     projects: "/projects",

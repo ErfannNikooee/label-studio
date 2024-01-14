@@ -1,3 +1,4 @@
+import React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { LsPlus } from "../../../assets/icons";
 import { Button } from "../../../components";
@@ -12,22 +13,42 @@ import { Block, Elem } from "../../../utils/bem";
 import { FF_LSDV_E_297, isFF } from "../../../utils/feature-flags";
 import { copyText } from "../../../utils/helpers";
 // import "./PeopleInvitation.styl";
-import { GroupList} from "./GroupList";
+import { GroupList } from "./GroupList";
 import "./GroupPage.styl";
 import { SelectedUser } from "./SelectedUser";
 import { shallow } from "enzyme";
 
 
-const GroupModal = () => {
+const GroupModal = ({ groupName, setGroupName, description, setDescription }) => {
   return (
     <Block name="group">
-      <Input
+      {/* <Input
         style={{ width: '100%' }}
-      />
+      /> */}
 
-      <Description style={{ width: '70%', marginTop: 16 }}>
-        Enter your group's name
-      </Description>
+
+      <form className={"group-name"} onSubmit={e => { e.preventDefault(); onSubmit(); }} >
+        <div className="field field--wide">
+          <label htmlFor="group_name">Group Name</label>
+          <input name="name" id="group_name" value={groupName} onChange={e => {e.preventDefault(); setGroupName(e.target.value)}} />
+        </div>
+        <Description style={{ width: '70%', marginTop: 16 }}>
+          Enter your group's name
+        </Description>
+        <div className="field field--wide">
+          <label htmlFor="group_description">Description</label>
+          <textarea
+            name="description"
+            id="group_description"
+            placeholder="Optional description of your group"
+            rows="4"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+          />
+        </div>
+      </form>
+
+
     </Block>
   );
 };
@@ -38,7 +59,8 @@ export const GroupPage = () => {
   const groupModal = useRef();
   const config = useConfig();
   const [selectedUser, setSelectedUser] = useState(null);
-  const [groupName,setGroupname] = useState(null)
+  const [groupName, setGroupName] = useState()
+  const [description, setDescription] = useState();
 
   const [link, setLink] = useState();
 
@@ -48,22 +70,16 @@ export const GroupPage = () => {
     localStorage.setItem('selectedUser', user?.id);
   }, [setSelectedUser]);
 
-  // const setInviteLink = useCallback((link) => {
-  //   const hostname = config.hostname || location.origin;
-
-  //   setLink(`${hostname}${link}`);
-  // }, [config, setLink]);
-
-  // const updateLink = useCallback(() => {
-  //   api.callApi('resetInviteLink').then(({ invite_url }) => {
-  //     setInviteLink(invite_url);
-  //   });
-  // }, [setInviteLink]);
-  const groupModalProps = useCallback (() => ({
+  const groupModalProps = useCallback((groupName, setGroupName, description, setDescription) => ({
     title: "Create Group",
     style: { width: 640, height: 472 },
     body: () => (
-      <GroupModal />
+      <GroupModal
+        groupName={groupName}
+        setGroupName={setGroupName}
+        description={description}
+        setDescription={setDescription}
+      />
     ),
     footer: () => {
 
@@ -82,65 +98,29 @@ export const GroupPage = () => {
     },
     bareFooter: true,
 
-  }),[])
+  }), [])
 
   const showGroupModal = useCallback(() => {
-    groupModal.current = modal(groupModalProps());
+    groupModal.current = modal(groupModalProps(groupName, setGroupName, description, setDescription));
   }, [groupModalProps])
 
   const onCreate = React.useCallback(async () => {
-    setWaitingStatus(true);
-    const response = await api.callApi('createGroup', {
-      params: {
-        pk: user.id,
-      },
-    });
+    // setWaitingStatus(true);
+    // const response = await api.callApi('createGroup', {
+    //   params: {
+    //     pk: user.id,
+    //   },
+    // });
 
-    setWaitingStatus(false);
+    // setWaitingStatus(false);
 
-    if (response !== null) {
-      history.push(`/group/${response.id}/members`);
-    }
-  }, [project, projectBody, finishUpload]);
+    // if (response !== null) {
+    //   history.push(`/group/${response.id}/members`);
+    // }
+  }, []);
 
 
-  // const inviteModalProps = useCallback((link) => ({
-  //   title: "Invite people",
-  //   style: { width: 640, height: 472 },
-  //   body: () => (
-  //     <InvitationModal link={link} />
-  //   ),
-  //   footer: () => {
-  //     const [copied, setCopied] = useState(false);
 
-  //     const copyLink = useCallback(() => {
-  //       setCopied(true);
-  //       copyText(link);
-  //       setTimeout(() => setCopied(false), 1500);
-  //     }, []);
-
-  //     return (
-  //       <Space spread>
-  //         <Space>
-  //           <Button style={{ width: 170 }} onClick={() => updateLink()}>
-  //             Reset Link
-  //           </Button>
-  //         </Space>
-  //         <Space>
-  //           <Button primary style={{ width: 170 }} onClick={copyLink}>
-  //             {copied ? "Copied!" : "Copy link"}
-  //           </Button>
-  //         </Space>
-  //       </Space>
-  //     );
-  //   },
-  //   bareFooter: true,
-  // }), []);
-    
-
-  // const showInvitationModal = useCallback(() => {
-  //   inviteModal.current = modal(inviteModalProps(link));
-  // }, [inviteModalProps, link]);
 
   const defaultSelected = useMemo(() => {
     return localStorage.getItem('selectedUser');
@@ -149,16 +129,6 @@ export const GroupPage = () => {
   useEffect(() => {
     groupModal.current?.update(groupModalProps())
   }, [])
-
-  // useEffect(() => {
-  //   api.callApi("inviteLink").then(({ invite_url }) => {
-  //     setInviteLink(invite_url);
-  //   });
-  // }, []);
-
-  // useEffect(() => {
-  //   inviteModal.current?.update(inviteModalProps(link));
-  // }, [link]);
 
   return (
     <Block name="group">
