@@ -22,11 +22,6 @@ import { shallow } from "enzyme";
 const GroupModal = ({ groupName, setGroupName, description, setDescription }) => {
   return (
     <Block name="group">
-      {/* <Input
-        style={{ width: '100%' }}
-      /> */}
-
-
       <form className={"group-name"} onSubmit={e => { e.preventDefault(); onSubmit(); }} >
         <div className="field field--wide">
           <label htmlFor="group_name">Group Name</label>
@@ -47,8 +42,6 @@ const GroupModal = ({ groupName, setGroupName, description, setDescription }) =>
           />
         </div>
       </form>
-
-
     </Block>
   );
 };
@@ -104,13 +97,35 @@ export const GroupPage = () => {
     groupModal.current = modal(groupModalProps(groupName, setGroupName, description, setDescription));
   }, [groupModalProps])
 
+  const userBody = {}
+    // first_name,
+    // last_name,
+
   const onCreate = React.useCallback(async () => {
     // setWaitingStatus(true);
-    // const response = await api.callApi('createGroup', {
-    //   params: {
-    //     pk: user.id,
-    //   },
-    // });
+    const response = await api.callApi('me', {
+    });
+    // console.log(response.id);
+    userBody.id = response.id
+    userBody.first_name= response.first_name
+    userBody.last_name = response.last_name
+    userBody.username = response.username
+    userBody.email = response.email
+
+
+    // userBody.first_name = response
+
+    // userbody = response.json()
+
+    const response2 = await api.callApi('createGroup', {
+      body: {
+        name : "groupName",
+        user : userBody,
+        description : "description"
+      },
+    });
+    // setGroupName(groupName)
+    // console.log(groupName);
 
     // setWaitingStatus(false);
 
@@ -128,6 +143,11 @@ export const GroupPage = () => {
 
   useEffect(() => {
     groupModal.current?.update(groupModalProps())
+  }, [])
+
+  useEffect(() => {
+    console.log(groupName);
+    // setGroupName(groupName)
   }, [])
 
   return (
