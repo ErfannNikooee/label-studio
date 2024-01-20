@@ -132,6 +132,12 @@
         "decorators": ""
     },
     {
+        "url": "/api/newgroup/",
+        "module": "groups.api.GroupListAPI",
+        "name": "groups:creategroup",
+        "decorators": ""
+    },
+    {
         "url": "/api/groups/<int:pk>",
         "module": "groups.api.GroupAPI",
         "name": "groups:api:group-detail",
