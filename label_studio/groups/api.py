@@ -15,7 +15,7 @@ from groups.serializers import (
     GroupSerializer,
     GroupsParamsSerializer,
 )
-from rest_framework import generics, status
+from rest_framework import generics, status,viewsets
 from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
@@ -23,6 +23,9 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from drf_yasg.utils import swagger_auto_schema
+from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed
 from users.models import User
 
 from label_studio.core.permissions import ViewClassPermission, all_permissions
@@ -197,7 +200,7 @@ class GroupMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroyAPIView
         operation_description='Update the settings for a specific group by ID.',
     ),
 )
-class GroupAPI(generics.RetrieveUpdateAPIView):
+class GroupAPI(generics.RetrieveUpdateAPIView, generics.CreateAPIView):
 
     parser_classes = (JSONParser, FormParser, MultiPartParser)
     queryset = Group.objects.all()
@@ -212,6 +215,9 @@ class GroupAPI(generics.RetrieveUpdateAPIView):
 
     def patch(self, request, *args, **kwargs):
         return super(GroupAPI, self).patch(request, *args, **kwargs)
+    
+    def create(self, request, *args, **kwargs):
+        return super(GroupAPI, self).create(request, *args, **kwargs)
 
     @swagger_auto_schema(auto_schema=None)
     def put(self, request, *args, **kwargs):

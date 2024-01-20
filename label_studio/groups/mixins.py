@@ -11,6 +11,9 @@ class GroupMemberMixin:
         #     return True
         # if self.group_id in user.active_group_id:
         #     return True
-        if self.group.id == group.id and self.user.id == user.id:
+
+        if user.active_organization_id == self.organization_id:
             return True
+        # if self.group.id == group.id and self.user.id == user.id:
+        #     return True
         return False
