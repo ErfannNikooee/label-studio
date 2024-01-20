@@ -5,6 +5,7 @@ export const API_CONFIG = {
     // Users
     users: "/users",
     me: "/current-user/whoami",
+    getuser :"/users/:pk",
 
     // Organization
     memberships: "/organizations/:pk/memberships",
@@ -14,7 +15,7 @@ export const API_CONFIG = {
     // Group
     groups :"/group",
     groupmembers :"/group/:pk/memberships",
-    createGroup :"POST:/group",
+    createGroup :"POST:/newgroup",
     updateGroup:"PATCH:/group/:pk",
     deleteGroup:"DELETE:/group/:pk",
 
