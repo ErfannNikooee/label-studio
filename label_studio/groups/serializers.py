@@ -59,7 +59,7 @@ class GroupMemberUserSerializer(DynamicFieldsMixin, serializers.ModelSerializer)
     group = GroupSerializer()
     class Meta:
         model = GroupMember
-        fields = ['id', 'user', 'group']
+        fields = "__all__"
 class GroupsParamsSerializer(serializers.Serializer):
     active = serializers.BooleanField(required=False, default=False)
     contributed_to_projects = serializers.BooleanField(required=False, default=False)
