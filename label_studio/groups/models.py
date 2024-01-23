@@ -13,14 +13,15 @@ GroupMemberMixin = load_func(settings.GROUP_MEMBER_MIXIN)
 
 class GroupMember(GroupMemberMixin, models.Model):
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete = models.CASCADE, related_name='gm_through', help_text='User ID'
+        settings.AUTH_USER_MODEL, on_delete = models.CASCADE, related_name='gm_user', help_text='User ID'
         )
     
     group = models.ForeignKey(
         'groups.Group', on_delete=models.CASCADE, help_text='Group ID'
     )
 
-    admin = models.BooleanField()
+    owner = models.BooleanField(default=False, editable=False)
+    admin = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
@@ -37,12 +38,10 @@ class GroupMember(GroupMemberMixin, models.Model):
 
     @property
     def is_owner(self):
-        return self.user.id == self.group.created_by.id
+        return self.is_owner or (self.user.id == self.group.created_by.id)
     @property
     def is_admin(self):
-        return self.user.admin
-
-    
+        return self.is_owner or self.admin
 
     class Meta:
         ordering = ['pk']
