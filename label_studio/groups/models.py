@@ -43,6 +43,13 @@ class GroupMember(GroupMemberMixin, models.Model):
     def is_admin(self):
         return self.is_owner or self.admin
 
+    def soft_delete(self):
+        self.deleted_at = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return f"user {self.user.email} group {self.group.name}"
+
     class Meta:
         ordering = ['pk']
 
@@ -98,3 +105,6 @@ class Group(GroupMixin, models.Model):
 
     def remove_user(self, user):
         GroupMember.objects.filter(user=user, group=self).delete()
+
+    def __str__(self):
+        return f"Group {self.id} | {self.name}"
