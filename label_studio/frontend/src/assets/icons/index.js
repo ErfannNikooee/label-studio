@@ -1,4 +1,7 @@
 export { ReactComponent as IconAllProjects } from './all-projects.svg';
+export {ReactComponent as SBUlogo} from './sbu-logo.svg';
+// export {ReactComponent as NLPLABLogo} from '';
+// export {ReactComponent as NLPLABTitle} from'';
 export { ReactComponent as IconBell } from './bell.svg';
 export { ReactComponent as IconBook } from './book.svg';
 export { ReactComponent as LsBulb } from './bulb.svg';

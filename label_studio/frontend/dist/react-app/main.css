@@ -1006,6 +1006,7 @@
   font-family: Roboto;
   font-size: 16px;
 }
+.ls-menuheaderlogo,
 .ls-menu-header {
   top: 0;
   height: var(--header-height);
@@ -1017,6 +1018,7 @@
   justify-content: space-evenly;
   border-bottom: 1px solid rgba(0,0,0,0.1);
 }
+.ls-menuheaderlogo__context,
 .ls-menu-header__context {
   flex: 1;
   display: flex;
@@ -1024,12 +1026,15 @@
   align-items: center;
   justify-content: space-between;
 }
+.ls-menuheaderlogo__context-item_left,
 .ls-menu-header__context-item_left,
+.ls-menuheaderlogo__context-item_right,
 .ls-menu-header__context-item_right {
   height: 100%;
   display: flex;
   align-items: center;
 }
+.ls-menuheaderlogo__trigger,
 .ls-menu-header__trigger {
   display: flex;
   padding: 0 20px;
@@ -1041,6 +1046,7 @@
   box-sizing: border-box;
   box-shadow: 1px 0 0 0 rgba(0,0,0,0.1);
 }
+.ls-menuheaderlogo__user,
 .ls-menu-header__user {
   display: flex;
   margin: 0 20px;
@@ -1050,6 +1056,7 @@
   align-items: center;
   justify-content: center;
 }
+.ls-menuheaderlogo__userpic-badge,
 .ls-menu-header__userpic-badge {
   position: absolute;
   top: 0;
