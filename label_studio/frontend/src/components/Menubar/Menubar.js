@@ -129,10 +129,12 @@ export const Menubar = ({
 
           <div className={menubarContext}>
             <LeftContextMenu className={contextItem.mod({left: true})}/>
-
+            
             <RightContextMenu className={contextItem.mod({right: true})}/>
           </div>
-
+          <div className='nlplab-logo'>
+            <img src={absoluteURL("/static/images/nlplab.svg")} alt="nlplab-logo" height="50"/>
+          </div>
           <Dropdown.Trigger ref={useMenuRef} align="right" content={(
             <Menu>
               <Menu.Item
@@ -170,7 +172,9 @@ export const Menubar = ({
               )}
             </div>
           </Dropdown.Trigger>
+          
         </div>
+        
       )}
 
       <VersionProvider>
