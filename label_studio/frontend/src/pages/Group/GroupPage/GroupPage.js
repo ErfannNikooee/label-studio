@@ -20,12 +20,14 @@ import { shallow } from "enzyme";
 
 
 const GroupModal = ({ groupName, setGroupName, description, setDescription }) => {
+  const memoizedSetGroupName = useMemo(() => setGroupName, [setGroupName]);
+
   return (
     <Block name="group">
       <form className={"group-name"} onSubmit={e => { e.preventDefault(); onSubmit(); }} >
         <div className="field field--wide">
           <label htmlFor="group_name">Group Name</label>
-          <input name="name" id="group_name" value={groupName} onChange={e => {e.preventDefault(); setGroupName(e.target.value)}} />
+          <input name="name" id="group_name" value={groupName} onChange={(e) => memoizedSetGroupName(e.target.value)} />
         </div>
         <Description style={{ width: '70%', marginTop: 16 }}>
           Enter your group's name
@@ -52,18 +54,17 @@ export const GroupPage = () => {
   const groupModal = useRef();
   const config = useConfig();
   const [selectedUser, setSelectedUser] = useState(null);
-  const [groupName, setGroupName] = useState()
-  const [description, setDescription] = useState();
+  const [groupName, setGroupName] = useState("")
+  const [description, setDescription] = useState("");
 
   const [link, setLink] = useState();
 
   const selectUser = useCallback((user) => {
     setSelectedUser(user);
-
     localStorage.setItem('selectedUser', user?.id);
   }, [setSelectedUser]);
 
-  const groupModalProps = useCallback((groupName, setGroupName, description, setDescription) => ({
+  const groupModalProps = useCallback(() => ({
     title: "Create Group",
     style: { width: 640, height: 472 },
     body: () => (
@@ -72,6 +73,7 @@ export const GroupPage = () => {
         setGroupName={setGroupName}
         description={description}
         setDescription={setDescription}
+        onSubmit={onCreate}
       />
     ),
     footer: () => {
@@ -91,11 +93,35 @@ export const GroupPage = () => {
     },
     bareFooter: true,
 
-  }), [])
+  }), [groupName, setGroupName, description, setDescription])
 
   const showGroupModal = useCallback(() => {
-    groupModal.current = modal(groupModalProps(groupName, setGroupName, description, setDescription));
-  }, [groupModalProps])
+    groupModal.current = modal({
+      title: "Create Group",
+      style: { width: 640, height: 472 },
+      body: () => (
+        <GroupModal
+          groupName={groupName}
+          setGroupName={setGroupName}
+          description={description}
+          setDescription={setDescription}
+          onSubmit={onCreate}
+        />
+      ),
+      footer: () => (
+        <Space spread>
+          <Space></Space>
+          <Space>
+            <Button primary style={{ width: 170 }} onClick={onCreate}>
+              Create
+            </Button>
+          </Space>
+        </Space>
+      ),
+      bareFooter: true,
+    });
+  }, []);
+
 
   const userBody = {}
     // first_name,
@@ -116,23 +142,21 @@ export const GroupPage = () => {
     // userBody.first_name = response
 
     // userbody = response.json()
-
     const response2 = await api.callApi('createGroup', {
       body: {
-        name : "groupName",
+        name : groupName,
         user : userBody,
         description : "description"
       },
     });
-    // setGroupName(groupName)
-    // console.log(groupName);
 
-    // setWaitingStatus(false);
+
+    //setWaitingStatus(false);
 
     // if (response !== null) {
     //   history.push(`/group/${response.id}/members`);
     // }
-  }, []);
+  }, [api, groupName, setGroupName] );
 
 
 
@@ -143,12 +167,7 @@ export const GroupPage = () => {
 
   useEffect(() => {
     groupModal.current?.update(groupModalProps())
-  }, [])
-
-  useEffect(() => {
-    console.log(groupName);
-    // setGroupName(groupName)
-  }, [])
+  }, [groupModalProps])
 
   return (
     <Block name="group">
