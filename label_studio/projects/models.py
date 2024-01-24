@@ -136,6 +136,11 @@ class Project(ProjectMixin, models.Model):
     organization = models.ForeignKey(
         'organizations.Organization', on_delete=models.CASCADE, related_name='projects', null=True
     )
+
+    # group = models.ForeignKey(
+    #     'groups.Group', on_delete=models.CASCADE,related_name = 'group',null = True
+    # )
+
     label_config = models.TextField(
         _('label config'),
         blank=True,

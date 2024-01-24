@@ -24,7 +24,7 @@ If you want to improve existing machine translation capabilities, you want to pr
   <Text name="english" value="$english" />
   <TextArea name="spanish" toName="english" transcription="true" 
             showSubmitButton="true" maxSubmissions="1" editable="true"
-            required="true" rows="5"/>
+            required="true" rows="10" cols="50"/>
   </View>
 </View>
 ```
@@ -53,7 +53,7 @@ Use the TextArea control tag to provide an editable, required text box to provid
 ```xml
 <TextArea name="spanish" toName="english" transcription="true" 
             showSubmitButton="true" maxSubmissions="1" editable="true"
-            required="true" rows="5"/>
+            required="true" rows="10" cols="50"/>
 ```
 
 ## Related tags

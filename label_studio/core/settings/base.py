@@ -200,6 +200,7 @@ INSTALLED_APPS = [
     'drf_generators',
     'core',
     'users',
+    'groups',
     'organizations',
     'data_import',
     'data_export',
@@ -511,6 +512,7 @@ IO_STORAGES_IMPORT_LINK_NAMES = [
 ]
 
 CREATE_ORGANIZATION = 'organizations.functions.create_organization'
+CREATE_GROUP = 'groups.functions.create_group'
 SAVE_USER = 'users.functions.save_user'
 POST_PROCESS_REIMPORT = 'core.utils.common.empty'
 USER_SERIALIZER = 'users.serializers.BaseUserSerializer'
@@ -527,8 +529,10 @@ PROJECT_MIXIN = 'projects.mixins.ProjectMixin'
 TASK_MIXIN = 'tasks.mixins.TaskMixin'
 ANNOTATION_MIXIN = 'tasks.mixins.AnnotationMixin'
 ORGANIZATION_MIXIN = 'organizations.mixins.OrganizationMixin'
+GROUP_MIXIN = 'groups.mixins.GroupMixin'
 USER_MIXIN = 'users.mixins.UserMixin'
 ORGANIZATION_MEMBER_MIXIN = 'organizations.mixins.OrganizationMemberMixin'
+GROUP_MEMBER_MIXIN = 'groups.mixins.GroupMemberMixin'
 MEMBER_PERM = 'core.api_permissions.MemberHasOwnerPermission'
 RECALCULATE_ALL_STATS = None
 GET_STORAGE_LIST = 'io_storages.functions.get_storage_list'

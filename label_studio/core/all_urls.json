@@ -108,6 +108,54 @@
         "decorators": ""
     },
     {
+        "url": "/group/",
+        "module": "groups.views.simple_view",
+        "name": "groups:group-simple",
+        "decorators": "" 
+    },
+    {
+        "url": "/group/webhooks",
+        "module": "groups.views.simple_view",
+        "name": "groups:group-simple-webhooks",
+        "decorators": ""
+    },
+    {
+        "url": "/members/",
+        "module": "groups.views.group_people_list",
+        "name": "groups:group-index",
+        "decorators": ""
+    },
+    {
+        "url": "/api/groups/",
+        "module": "groups.api.GroupListAPI",
+        "name": "groups:api:group-list",
+        "decorators": ""
+    },
+    {
+        "url": "/api/newgroup/",
+        "module": "groups.api.GroupListAPI",
+        "name": "groups:creategroup",
+        "decorators": ""
+    },
+    {
+        "url": "/api/groups/<int:pk>",
+        "module": "groups.api.GroupAPI",
+        "name": "groups:api:group-detail",
+        "decorators": ""
+    },
+    {
+        "url": "/api/groups/<int:pk>/memberships",
+        "module": "groups.api.GroupMemberListAPI",
+        "name": "groups:api:group-memberships-list",
+        "decorators": ""
+    },
+    {
+        "url": "/api/groups/<int:pk>/memberships/<int:user_pk>/",
+        "module": "groups.api.GroupMemberDetailAPI",
+        "name": "groups:api:group-membership-detail",
+        "decorators": ""
+    },
+    {
         "url": "/projects/",
         "module": "projects.views.project_list",
         "name": "projects:project-index",

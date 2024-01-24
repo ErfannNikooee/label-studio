@@ -19,16 +19,25 @@ gtag('config', 'UA-129877673-1');
 {% block content %}
 <div class="login_page_new_ui">
   <div class="left">
-    <h2>Welcome</h2>
-    <img src="{{ settings.HOSTNAME }}{% static 'images/label_studio_logo.svg' %}" height="93"  alt="Label Studio Logo"/>
-    <h3>A full-fledged open source solution for data labeling</h3>
-
-    {% include 'users/new-ui/user_tips.html' %}
-
-    <div class="logo_humansignal">
-      Brought to you by
-      <img src="{{ settings.HOSTNAME }}{% static 'images/human_signal_logo.svg' %}" height="22"  alt="Human Signal Logo"/>
+    <div class="sbulogo">
+      <img src="{{ settings.HOSTNAME }}{% static 'images/sbu-logo.svg' %}" height="93"  alt="SBULogo"/>
     </div>
+    
+    <h2> به لیبل استودیو خوش آمدید</h2>
+
+    <h3>یک محیط برچسب‌زنی مناسب برای جمع‌آوری انواع دادگان</h3>
+
+    <h5>توسعه یافته برای آزمایشگاه پردازش زبان طبیعی دانشگاه شهید بهشتی</h5>
+
+
+    {% comment %} {% include 'users/new-ui/user_tips.html' %} {% endcomment %}
+    <div class="copyright">
+      <div class="logo_humansignal">
+        برپایه‌ی
+        <img src="{{ settings.HOSTNAME }}{% static 'images/label_studio_logo.svg' %}" height="22"  alt="Human Signal Logo"/>
+      </div>
+    </div>
+    
   </div>
   <div class="right">
     <div class="toggle">

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StaticContent } from '../../app/StaticContent/StaticContent';
-import { IconBook, IconFolder, IconPersonInCircle, IconPin, IconTerminal, LsDoor, LsGitHub, LsSettings, LsSlack } from '../../assets/icons';
+import { IconBook, IconFolder, IconPersonInCircle, IconGroup ,IconPin, IconTerminal, LsDoor, LsGitHub, LsSettings, LsSlack } from '../../assets/icons';
 import { useConfig } from '../../providers/ConfigProvider';
 import { useContextComponent, useFixedLocation } from '../../providers/RoutesProvider';
 import { cn } from '../../utils/bem';
@@ -129,10 +129,12 @@ export const Menubar = ({
 
           <div className={menubarContext}>
             <LeftContextMenu className={contextItem.mod({left: true})}/>
-
+            
             <RightContextMenu className={contextItem.mod({right: true})}/>
           </div>
-
+          <div className='nlplab-logo'>
+            <img src={absoluteURL("/static/images/nlplab.svg")} alt="nlplab-logo" height="50"/>
+          </div>
           <Dropdown.Trigger ref={useMenuRef} align="right" content={(
             <Menu>
               <Menu.Item
@@ -170,7 +172,9 @@ export const Menubar = ({
               )}
             </div>
           </Dropdown.Trigger>
+          
         </div>
+        
       )}
 
       <VersionProvider>
@@ -196,6 +200,13 @@ export const Menubar = ({
                   label="Organization"
                   to="/organization"
                   icon={<IconPersonInCircle/>}
+                  data-external
+                  exact
+                />
+                <Menu.Item
+                  label="Group"
+                  to="/group"
+                  icon={<IconGroup/>}
                   data-external
                   exact
                 />

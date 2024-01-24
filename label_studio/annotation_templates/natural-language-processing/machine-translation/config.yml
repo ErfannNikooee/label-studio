@@ -11,7 +11,7 @@ config: |
 
     <Text name="english" value="$english" />
 
-    <TextArea name="spanish" toName="english" transcription="true"
+    <TextArea name="spanish" toName="english" transcription="true" rows="10" cols="50"
               showSubmitButton="true" maxSubmissions="1" editable="true"
               required="true"/>
     </View>

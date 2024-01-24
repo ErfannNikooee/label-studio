@@ -5,11 +5,19 @@ export const API_CONFIG = {
     // Users
     users: "/users",
     me: "/current-user/whoami",
+    getuser :"/users/:pk",
 
     // Organization
     memberships: "/organizations/:pk/memberships",
     inviteLink: "/invite",
     resetInviteLink: "POST:/invite/reset-token",
+
+    // Group
+    groups :"/group",
+    groupmembers :"/group/:pk/memberships",
+    createGroup :"POST:/newgroup",
+    updateGroup:"PATCH:/group/:pk",
+    deleteGroup:"DELETE:/group/:pk",
 
     // Project
     projects: "/projects",
