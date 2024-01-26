@@ -38,7 +38,7 @@ class GroupMember(GroupMemberMixin, models.Model):
 
     @property
     def is_owner(self):
-        return self.is_owner or (self.user.id == self.group.created_by.id)
+        return self.owner or (self.user.id == self.group.created_by.id)
     @property
     def is_admin(self):
         return self.is_owner or self.admin
