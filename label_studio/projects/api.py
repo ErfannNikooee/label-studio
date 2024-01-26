@@ -163,7 +163,8 @@ class ProjectListAPI(generics.ListCreateAPIView):
 
     def perform_create(self, ser):
         try:
-            ser.save(organization=self.request.user.active_organization)
+            user_organization = OrganizationMember.objects.filter(user=self.request.user).first()
+            ser.save(organization=user_organization.organization)
         except IntegrityError as e:
             if str(e) == 'UNIQUE constraint failed: project.title, project.created_by_id':
                 raise ProjectExistException(
@@ -224,8 +225,10 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
         serializer = GetFieldsSerializer(data=self.request.query_params)
         serializer.is_valid(raise_exception=True)
         fields = serializer.validated_data.get('include')
-        user_organizations = OrganizationMember.objects.filter(user=self.request.user).values_list('organization',flat=True)
-        return Project.objects.with_counts(fields=fields).filter(organization__in=user_organizations)
+        user_organizations = OrganizationMember.objects.filter(user=self.request.user).values_list('organization',
+                                                                                                   flat=True)
+        project = Project.objects.filter(organization__in=user_organizations)
+        return project
 
     def get(self, request, *args, **kwargs):
         return super(ProjectAPI, self).get(request, *args, **kwargs)
