@@ -49,7 +49,7 @@ archive
 pyrightconfig.json
 tags.temp
 mydatabase
-label_studio.sqlite3
+# label_studio.sqlite3
 *.egg-info
 tmp
 .DS_Store
