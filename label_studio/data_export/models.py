@@ -143,7 +143,18 @@ class DataExport(object):
 
     @staticmethod
     def generate_export_file(project, tasks, output_format, download_resources, get_args):
-        # prepare for saving
+        for _, annotation_data in enumerate(tasks):
+            labels = {}
+            for annotation in annotation_data["annotations"]:
+                for annotation_result in annotation["result"]:
+                    annotaion_label = annotation_result["value"][annotation_result["type"]][0]
+                    if annotaion_label in labels:
+                            labels[annotaion_label] = labels[annotaion_label]+1
+                    else:
+                        labels[annotaion_label] = 1
+            if len(labels) > 0:
+                annotation_data['most_common_label'] = max(labels.items(), key=lambda x: x[1])
+            
         now = datetime.now()
         data = json.dumps(tasks, ensure_ascii=False)
         md5 = hashlib.md5(json.dumps(data).encode('utf-8')).hexdigest()   # nosec
