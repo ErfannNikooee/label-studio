@@ -154,7 +154,8 @@ class DataExport(object):
                         labels[annotaion_label] = 1
             if len(labels) > 0:
                 annotation_data['most_common_label'] = max(labels.items(), key=lambda x: x[1])
-            
+
+        # prepare for saving
         now = datetime.now()
         data = json.dumps(tasks, ensure_ascii=False)
         md5 = hashlib.md5(json.dumps(data).encode('utf-8')).hexdigest()   # nosec

@@ -36,7 +36,7 @@ from .serializers import (
 )
 
 logger = logging.getLogger(__name__)
-
+from organizations.models import OrganizationMember
 
 @method_decorator(
     name='get',
@@ -69,7 +69,10 @@ class ExportFormatsListAPI(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_view
 
     def get_queryset(self):
-        return Project.objects.filter(organization=self.request.user.active_organization)
+        user_organizations = OrganizationMember.objects.filter(user=self.request.user).values_list('organization',
+                                                                                                   flat=True)
+
+        return Project.objects.filter(organization__in=user_organizations)
 
     def get(self, request, *args, **kwargs):
         project = self.get_object()
@@ -157,7 +160,9 @@ class ExportAPI(generics.RetrieveAPIView):
     permission_required = all_permissions.projects_change
 
     def get_queryset(self):
-        return Project.objects.filter(organization=self.request.user.active_organization)
+        user_organizations = OrganizationMember.objects.filter(user=self.request.user).values_list('organization',
+                                                                                                   flat=True)
+        return Project.objects.filter(organization__in=user_organizations)
 
     def get_task_queryset(self, queryset):
         return queryset.select_related('project').prefetch_related('annotations', 'predictions')
@@ -223,7 +228,9 @@ class ProjectExportFiles(generics.RetrieveAPIView):
     swagger_schema = None  # hide export files endpoint from swagger
 
     def get_queryset(self):
-        return Project.objects.filter(organization=self.request.user.active_organization)
+        user_organizations = OrganizationMember.objects.filter(user=self.request.user).values_list('organization',
+                                                                                                   flat=True)
+        return Project.objects.filter(organization__in=user_organizations)
 
     def get(self, request, *args, **kwargs):
         # project permission check
@@ -257,7 +264,9 @@ class ProjectExportFilesAuthCheck(APIView):
         except ValueError:
             return Response({'detail': 'Incorrect filename in export'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
-        generics.get_object_or_404(Project.objects.filter(organization=self.request.user.active_organization), pk=pk)
+        user_organizations = OrganizationMember.objects.filter(user=self.request.user).values_list('organization',
+                                                                                                   flat=True)
+        generics.get_object_or_404(Project.objects.filter(organization__in=user_organizations), pk=pk)
         return Response({'detail': 'auth ok'}, status=status.HTTP_200_OK)
 
 
