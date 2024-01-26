@@ -20,7 +20,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg.utils import swagger_auto_schema
 from projects.functions.stream_history import fill_history_annotation
 from projects.models import Project
-from rest_framework import generics, viewsets
+from rest_framework import generics, viewsets, status
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
@@ -287,6 +287,17 @@ class AnnotationAPI(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = AnnotationSerializer
     queryset = Annotation.objects.all()
 
+    def check_user_editing_self_annotation(self, request):
+        a = self.get_object()
+        if request.user.id != self.get_object().completed_by.id:
+            return False
+        return True
+
+    def perform_authentication(self, request):
+        if not self.check_user_editing_self_annotation(request):
+            raise PermissionDenied("You are not allowed to edit other people's annotations")
+        return super().perform_authentication(request)
+
     def perform_destroy(self, annotation):
         annotation.delete()
 
@@ -496,6 +507,15 @@ class AnnotationDraftAPI(generics.RetrieveUpdateDestroyAPIView):
         DELETE=all_permissions.annotations_delete,
     )
     swagger_schema = None
+
+    def check_user_editing_self_annotation(self, request):
+        if request.user.id != self.get_object().annotation.completed_by.id:
+            return False
+        return True
+    def perform_authentication(self, request):
+        if not self.check_user_editing_self_annotation(request):
+            raise PermissionDenied("You are not allowed to edit other people's annotations")
+        return super().check_permissions(request)
 
 
 @method_decorator(
