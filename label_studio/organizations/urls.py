@@ -15,16 +15,23 @@ _urlpatterns = [
 # API URLs
 _api_urlpattens = [
     # organization list viewset
+    path('new', api.OrganizationCreateAPI.as_view(), name='organization-create'),
     path('', api.OrganizationListAPI.as_view(), name='organization-list'),
     # organization detail viewset
     path('<int:pk>', api.OrganizationAPI.as_view(), name='organization-detail'),
     # organization memberships list viewset
     path('<int:pk>/memberships', api.OrganizationMemberListAPI.as_view(), name='organization-memberships-list'),
     path(
-        '<int:pk>/memberships/<int:user_pk>/',
+        '<int:pk>/memberships/<int:user_pk>/delete',
         api.OrganizationMemberDetailAPI.as_view(),
         name='organization-membership-detail',
     ),
+    path(
+        '<int:pk>/memberships/<int:user_pk>/add',
+        api.OrganizationMemberAddAPI.as_view(),
+        name='organization-membership-add',
+    ),
+    path("<int:pk>/admins/<int:user_pk>", api.OrganizationAdminAPI.as_view(), name='organization-admins')
 ]
 # TODO: these urlpatterns should be moved in core/urls with include('organizations.urls')
 urlpatterns = [

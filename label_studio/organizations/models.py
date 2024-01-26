@@ -27,6 +27,8 @@ class OrganizationMember(OrganizationMemberMixin, models.Model):
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     updated_at = models.DateTimeField(_('updated at'), auto_now=True)
 
+    admin = models.BooleanField(default=False)
+
     deleted_at = models.DateTimeField(
         _('deleted at'),
         default=None,
@@ -53,6 +55,10 @@ class OrganizationMember(OrganizationMemberMixin, models.Model):
     @property
     def is_owner(self):
         return self.user.id == self.organization.created_by.id
+
+    @property
+    def is_admin(self):
+        return self.is_owner or self.admin
 
     class Meta:
         ordering = ['pk']
