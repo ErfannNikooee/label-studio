@@ -32,11 +32,33 @@ const InvitationModal = ({ link }) => {
   );
 };
 
+
+const OrganizationModal = ({ orgName, setOrgName }) => {
+  const memoizedSetOrganizationName = useMemo(() => setOrgName, [setOrgName]);
+
+  return (
+    <Block name="organization">
+      <form className={"organization-name"} onSubmit={e => { e.preventDefault(); onSubmit(); }} >
+        <div className="field field--wide">
+          <label htmlFor="organization">Organization Name</label>
+          <input name="name" id="organization_name" value={orgName} onChange={(e) => memoizedSetOrganizationName(e.target.value)} />
+        </div>
+        <Description style={{ width: '70%', marginTop: 16 }}>
+          Enter the organization's name
+        </Description>
+      </form>
+    </Block>
+  );
+};
+
+
 export const PeoplePage = () => {
   const api = useAPI();
   const inviteModal = useRef();
+  const organizationModal = useRef();
   const config = useConfig();
   const [selectedUser, setSelectedUser] = useState(null);
+  const [orgName, setOrgName] = useState()
 
   const [link, setLink] = useState();
 
@@ -91,13 +113,38 @@ export const PeoplePage = () => {
     bareFooter: true,
   }), []);
 
+  const organizationModalProps = useCallback(() => {
+    organizationModal.current = modal({
+      title: "Create Organization",
+      style: { width: 640, height: 472 },
+      body: () => (
+        <OrganizationModal
+          orgName={orgName}
+          setOrgName={setOrgName}
+          // onSubmit={onCreate}
+        />
+      ),
+      footer: () => (
+        <Space spread>
+          <Space></Space>
+          <Space>
+            <Button primary style={{ width: 170 }} >
+              Create
+            </Button>
+          </Space>
+        </Space>
+      ),
+      bareFooter: true,
+    });
+  }, []);
+
   const showInvitationModal = useCallback(() => {
     inviteModal.current = modal(inviteModalProps(link));
   }, [inviteModalProps, link]);
 
-  const defaultSelected = useMemo(() => {
-    return localStorage.getItem('selectedUser');
-  }, []);
+  const showOrganizationModal = useCallback(() => {
+    organizationModal.current = modal(organizationModalProps(orgName,setOrgName))
+  }, [orgName,setOrgName]);
 
   useEffect(() => {
     api.callApi("inviteLink").then(({ invite_url }) => {
@@ -109,15 +156,28 @@ export const PeoplePage = () => {
     inviteModal.current?.update(inviteModalProps(link));
   }, [link]);
 
+  const defaultSelected = useMemo(() => {
+    return localStorage.getItem('selectedUser');
+  }, []);
+
+  useEffect(() => {
+    organizationModal.current?.update(organizationModalProps())
+  }, [organizationModalProps])
+
   return (
     <Block name="people">
       <Elem name="controls">
         <Space spread>
           <Space></Space>
 
+
           <Space>
+
             <Button icon={<LsPlus />} primary onClick={showInvitationModal}>
               Add People
+            </Button>
+            <Button icon={<LsPlus />} primary onClick={showOrganizationModal}>
+              Create Organization
             </Button>
           </Space>
         </Space>

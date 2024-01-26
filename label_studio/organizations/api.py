@@ -119,7 +119,7 @@ class OrganizationMemberListAPI(generics.ListAPIView):
         }
 
     def get_queryset(self):
-        org = generics.get_object_or_404(self.request.user.organizations, pk=self.kwargs[self.lookup_field])
+        org = generics.get_object_or_404(Organization, pk=self.kwargs[self.lookup_field])
         if flag_set('fix_backend_dev_3134_exclude_deactivated_users', self.request.user):
             serializer = OrganizationsParamsSerializer(data=self.request.GET)
             serializer.is_valid(raise_exception=True)
@@ -174,13 +174,19 @@ class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroy
 
     def delete(self, request, pk=None, user_pk=None):
         org = self.get_parent_object()
-        if org != request.user.active_organization:
-            raise PermissionDenied('You can delete members only for your current active organization')
+        if not org:
+            raise NotFound("organization not found")
+        # if org != request.user.active_organization:
+        #     raise PermissionDenied('You can delete members only for your current active organization')
 
         user = get_object_or_404(User, pk=user_pk)
         member = get_object_or_404(OrganizationMember, user=user, organization=org)
+        om_self = get_object_or_404(OrganizationMember, user=request.user, organization=org)
         if member.deleted_at is not None:
             raise NotFound('Member not found')
+
+        if (not om_self or not om_self.is_admin ) and not user.is_superuser:
+            raise PermissionDenied('You can remove members from the organization that you are admin/owner in.')
 
         if member.user_id == request.user.id:
             return Response({'detail': 'User cannot soft delete self'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
@@ -271,3 +277,186 @@ class OrganizationResetTokenAPI(APIView):
         serializer = OrganizationInviteSerializer(data={'invite_url': invite_url, 'token': org.token})
         serializer.is_valid()
         return Response(serializer.data, status=201)
+
+
+@method_decorator(
+    name='post',
+    decorator=swagger_auto_schema(
+        tags=['Organizations'],
+        operation_summary='Create new organization',
+    ),
+)
+class OrganizationCreateAPI(generics.ListCreateAPIView):
+
+    parser_classes = (JSONParser, FormParser, MultiPartParser)
+    queryset = Organization.objects.all()
+    permission_required = all_permissions.groups_change
+    serializer_class = OrganizationSerializer
+    http_method_names = ['post']
+    redirect_route = 'organization-list'
+    redirect_kwarg = 'pk'
+
+    def create(self, request, *args, **kwargs):
+        response = super(OrganizationCreateAPI, self).create(request, *args, **kwargs)
+        if response.status_code == status.HTTP_201_CREATED:
+            # Access the created object from the response data
+            created_object = response.data
+            new_om = OrganizationMember(user=self.request.user,
+                                        organization=Organization.objects.get(id=created_object['id']))
+            new_om.save()
+        return response
+
+@method_decorator(
+    name='delete',
+    decorator=swagger_auto_schema(
+        tags=['Organizations'],
+        operation_summary='remove user as an admin from the Organization',
+        manual_parameters=[
+            openapi.Parameter(
+                name='pk',
+                type=openapi.TYPE_INTEGER,
+                in_=openapi.IN_PATH,
+                description='A unique integer value identifying this Organization.',
+            ),
+            openapi.Parameter(
+                name='user_pk',
+                type=openapi.TYPE_INTEGER,
+                in_=openapi.IN_PATH,
+                description='A unique integer value identifying the user to be removed as admin.',
+            ),
+        ],
+        responses={
+            204: 'admin removed successfully.',
+            403: 'Organization not found/no permission',
+            404: 'Member not found',
+            405: 'User cannot remove self as admin if owner.',
+
+        },
+    ),
+)
+@method_decorator(
+    name='put',
+    decorator=swagger_auto_schema(
+        tags=['Organizations'],
+        operation_summary='set user as an admin to the Organization',
+        manual_parameters=[
+            openapi.Parameter(
+                name='pk',
+                type=openapi.TYPE_INTEGER,
+                in_=openapi.IN_PATH,
+                description='A unique integer value identifying this Organization.',
+            ),
+            openapi.Parameter(
+                name='user_pk',
+                type=openapi.TYPE_INTEGER,
+                in_=openapi.IN_PATH,
+                description='A unique integer value identifying the user to be set as admin.',
+            ),
+        ],
+        responses={
+            204: 'admin removed successfully.',
+            403: 'Organization not found/no permission',
+            404: 'Member not found',
+            405: 'User already owner',
+
+        },
+    ),
+)
+class OrganizationAdminAPI(GetParentObjectMixin, generics.RetrieveDestroyAPIView):
+    permission_required = ViewClassPermission(
+        DELETE=all_permissions.groups_change,
+    )
+    parent_queryset = Organization.objects.all()
+    parser_classes = (JSONParser, FormParser, MultiPartParser)
+    permission_classes = (IsAuthenticated, HasObjectPermission)
+    serializer_class = OrganizationMemberUserSerializer  # Assuming this is the right serializer
+    http_method_names = ['delete','put','get']
+
+    def delete(self, request, pk=None, user_pk=None):
+        om = get_object_or_404(OrganizationMember, user__id=user_pk, organization__id=pk)
+        om_self = get_object_or_404(OrganizationMember, user__id=self.request.user.id, organization__id=pk)
+        if not om:
+            raise PermissionDenied("organization not found")
+        if (not om_self or not om_self.is_admin) and not user.is_superuser:
+            raise PermissionDenied('You can remove admins only in the organizations you are admin/owner in')
+
+        if om.deleted_at is not None:
+            raise NotFound('Member not found')
+
+        if om.user.id == request.user.id and om.is_owner:
+            return Response({'detail': 'cannot remove  self as admin'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        om.admin = False
+        om.save()
+        return Response(status=204)  # 204 No Content is a common HTTP status for successful delete requests
+
+    def put(self, request, pk=None, user_pk=None):
+        om = get_object_or_404(OrganizationMember, user__id=user_pk, organization__id=pk)
+        om_self = get_object_or_404(OrganizationMember, user__id=self.request.user.id, organization__id=pk)
+        if not om:
+            raise PermissionDenied("organization not found")
+        if (not om_self or not om_self.is_admin) and not user.is_superuser:
+            raise PermissionDenied('You can add admins only in the organizations you are admin/owner in')
+
+        if om.deleted_at is not None:
+            raise NotFound('Member not found')
+
+        if om.user.id == request.user.id and om.is_owner:
+            return Response({'detail': 'cannot set self as admin'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+
+        om.admin = True
+        om.save()
+        return Response(status=204)  # 204 No Content is a common HTTP status for successful delete requests
+
+@method_decorator(
+    name='post',
+    decorator=swagger_auto_schema(
+        tags=['Organizations'],
+        operation_summary='add an organization member',
+        operation_description='add member to an organization.',
+        manual_parameters=[
+            openapi.Parameter(
+                name='pk',
+                type=openapi.TYPE_INTEGER,
+                in_=openapi.IN_PATH,
+                description='A unique integer value identifying this organization.',
+            ),
+            openapi.Parameter(
+                name='user_pk',
+                type=openapi.TYPE_INTEGER,
+                in_=openapi.IN_PATH,
+                description='A unique integer value identifying the user to be added to the organization.',
+            ),
+        ],
+        responses={
+            204: 'Member added successfully.',
+            404: 'Member not found'
+        },
+    ),
+)
+class OrganizationMemberAddAPI(GetParentObjectMixin, generics.ListCreateAPIView):
+    permission_required = ViewClassPermission(
+        POST=all_permissions.organizations_create,
+    )
+    parent_queryset = Organization.objects.all()
+    parser_classes = (JSONParser, FormParser, MultiPartParser)
+    permission_classes = (IsAuthenticated, HasObjectPermission)
+    serializer_class = OrganizationMemberUserSerializer  # Assuming this is the right serializer
+    http_method_names = ['post']
+
+    def create(self, request, pk=None, user_pk=None):
+        org = self.get_parent_object()
+        if not org:
+            raise NotFound("organization not found")
+        # if org != request.user.active_organization:
+        #     raise PermissionDenied('You can delete members only for your current active organization')
+
+        user = get_object_or_404(User, pk=user_pk)
+        om_self = get_object_or_404(OrganizationMember, user=request.user, organization=org)
+        if user is None:
+            raise NotFound('Member not found')
+        if (not om_self or not om_self.is_admin) and not user.is_superuser:
+            raise PermissionDenied('You can add members to the organization that you are admin/owner in.')
+        new_om = OrganizationMember(user=user, organization=org)
+        new_om.save()
+        return Response(status=204)  # 204 No Content is a common HTTP status for successful delete requests

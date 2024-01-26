@@ -54,12 +54,15 @@ from tasks.models import (
     bulk_update_stats_project_tasks,
 )
 
+from organizations.models import OrganizationMember
+
 logger = logging.getLogger(__name__)
 
 
 class ProjectManager(models.Manager):
     def for_user(self, user):
-        return self.filter(organization=user.active_organization)
+        user_organization = OrganizationMember.objects.filter(user=user).first()
+        return self.filter(organization=user_organization.organization)
 
     COUNTER_FIELDS = [
         'task_number',

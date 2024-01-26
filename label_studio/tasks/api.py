@@ -288,8 +288,8 @@ class AnnotationAPI(generics.RetrieveUpdateDestroyAPIView):
     queryset = Annotation.objects.all()
 
     def check_user_editing_self_annotation(self, request):
-        a = self.get_object()
-        if request.user.id != self.get_object().completed_by.id:
+        om = self.get_object().project.organization.members.get(user=request.user)
+        if request.user.id != self.get_object().completed_by.id and not om.is_admin:
             return False
         return True
 
@@ -509,12 +509,14 @@ class AnnotationDraftAPI(generics.RetrieveUpdateDestroyAPIView):
     swagger_schema = None
 
     def check_user_editing_self_annotation(self, request):
-        if request.user.id != self.get_object().annotation.completed_by.id:
+        om = self.get_object().project.organization.members.get(user=request.user)
+        if request.user.id != self.get_object().annotation.completed_by.id and not om.is_admin:
             return False
         return True
+
     def perform_authentication(self, request):
         if not self.check_user_editing_self_annotation(request):
-            raise PermissionDenied("You are not allowed to edit other people's annotations")
+            raise PermissionDenied("only admins can edit other user's annotations.")
         return super().check_permissions(request)
 
 
