@@ -49,7 +49,7 @@ from tasks.serializers import (
 )
 from webhooks.models import WebhookAction
 from webhooks.utils import api_webhook, api_webhook_for_delete, emit_webhooks_for_instance
-
+from organizations.models import OrganizationMember
 logger = logging.getLogger(__name__)
 
 
@@ -147,7 +147,9 @@ class ProjectListAPI(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         fields = serializer.validated_data.get('include')
         filter = serializer.validated_data.get('filter')
-        projects = Project.objects.filter(organization=self.request.user.active_organization).order_by(
+        user_organizations = OrganizationMember.objects.filter(user=self.request.user).values_list('organization', flat=True)
+
+        projects = Project.objects.filter(organization__in=user_organizations).order_by(
             F('pinned_at').desc(nulls_last=True), '-created_at'
         )
         if filter in ['pinned_only', 'exclude_pinned']:
@@ -222,7 +224,8 @@ class ProjectAPI(generics.RetrieveUpdateDestroyAPIView):
         serializer = GetFieldsSerializer(data=self.request.query_params)
         serializer.is_valid(raise_exception=True)
         fields = serializer.validated_data.get('include')
-        return Project.objects.with_counts(fields=fields).filter(organization=self.request.user.active_organization)
+        user_organizations = OrganizationMember.objects.filter(user=self.request.user).values_list('organization',flat=True)
+        return Project.objects.with_counts(fields=fields).filter(organization__in=user_organizations)
 
     def get(self, request, *args, **kwargs):
         return super(ProjectAPI, self).get(request, *args, **kwargs)
