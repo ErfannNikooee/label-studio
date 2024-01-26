@@ -15,8 +15,8 @@ from groups.serializers import (
     GroupMemberUserSerializer,
     GroupSerializer,
     GroupsParamsSerializer,
-    UserSerializerWithProjects
 )
+from organizations.serializers import UserSerializerWithProjects
 from users.serializers import UserSerializer
 from rest_framework import generics, status,viewsets
 from rest_framework.exceptions import NotFound, PermissionDenied
@@ -124,7 +124,7 @@ class GroupMemberListAPI(generics.ListAPIView):
 
     def get_queryset(self):
         group_members = generics.get_object_or_404(Group, pk=self.kwargs[self.lookup_field]).users
-        return group_members.all()
+        return group_members.filter(gm_user__deleted_at=None)
 
 @method_decorator(
     name='delete',
