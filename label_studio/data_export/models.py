@@ -143,8 +143,16 @@ class DataExport(object):
 
     @staticmethod
     def generate_export_file(project, tasks, output_format, download_resources, get_args):
-        for _, annotation_data in enumerate(tasks):
+        for idx, annotation_data in enumerate(tasks):
+            # most_common_file = None
+            most_common_label = None
+            # files = {}
             labels = {}
+            # file_upload = annotation_data["file_upload"]
+            # if file_upload in files:
+            #     files[file_upload] = files[file_upload] + 1
+            # else:
+            #     files[file_upload] = 1
             for annotation in annotation_data["annotations"]:
                 for annotation_result in annotation["result"]:
                     annotaion_label = annotation_result["value"][annotation_result["type"]][0]
@@ -154,6 +162,8 @@ class DataExport(object):
                         labels[annotaion_label] = 1
             if len(labels) > 0:
                 annotation_data['most_common_label'] = max(labels.items(), key=lambda x: x[1])
+            # if len(files) > 0:
+            #     annotation_data['most_common_file'] = max(files.items(), key= lambda x: x[1])
 
         # prepare for saving
         now = datetime.now()

@@ -73,7 +73,7 @@ class OrganizationMemberAdmin(admin.ModelAdmin):
         self.ordering = ('id',)
 
 
-admin.site.register(User, UserAdminShort)
+admin.site.register(User)
 admin.site.register(Project)
 admin.site.register(MLBackend)
 admin.site.register(MLBackendTrainJob)
