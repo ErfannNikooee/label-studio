@@ -301,8 +301,11 @@ class OrganizationCreateAPI(generics.ListCreateAPIView):
         if response.status_code == status.HTTP_201_CREATED:
             # Access the created object from the response data
             created_object = response.data
-            new_om = OrganizationMember(user=self.request.user,
+            user = get_object_or_404(User, user__id=created_object["created_by"])
+
+            new_om = OrganizationMember(user=user,
                                         organization=Organization.objects.get(id=created_object['id']))
+            new_om.admin = True
             new_om.save()
         return response
 
