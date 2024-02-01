@@ -27,6 +27,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from users.models import User
+from django.http import JsonResponse
 
 from label_studio.core.permissions import ViewClassPermission, all_permissions
 from label_studio.core.utils.params import bool_from_request
@@ -300,13 +301,13 @@ class OrganizationCreateAPI(generics.ListCreateAPIView):
         response = super(OrganizationCreateAPI, self).create(request, *args, **kwargs)
         if response.status_code == status.HTTP_201_CREATED:
             # Access the created object from the response data
+            body = request.data
             created_object = response.data
-            user = get_object_or_404(User, user__id=created_object["created_by"])
 
-            new_om = OrganizationMember(user=user,
-                                        organization=Organization.objects.get(id=created_object['id']))
-            new_om.admin = True
-            new_om.save()
+            om = get_object_or_404(OrganizationMember, user__id=self.request.user.id, organization__id=1)
+            om.organization = Organization.objects.get(id=created_object['id'])
+            om.admin = True
+            om.save()
         return response
 
 @method_decorator(
