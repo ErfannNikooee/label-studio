@@ -163,9 +163,10 @@ class OrganizationMemberListAPI(generics.ListAPIView):
         },
     ),
 )
-class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroyAPIView):
+class OrganizationMemberDeleteAPI(GetParentObjectMixin, generics.RetrieveDestroyAPIView):
     permission_required = ViewClassPermission(
         DELETE=all_permissions.organizations_change,
+        PUT=all_permissions.organizations_change,
     )
     parent_queryset = Organization.objects.all()
     parser_classes = (JSONParser, FormParser, MultiPartParser)
@@ -174,25 +175,44 @@ class OrganizationMemberDetailAPI(GetParentObjectMixin, generics.RetrieveDestroy
     http_method_names = ['delete']
 
     def delete(self, request, pk=None, user_pk=None):
-        org = self.get_parent_object()
+        # org_self = self.get_parent_object()
+        # if not org_self:
+        #     raise NotFound("self organization not found")
+        org = get_object_or_404(Organization, id=pk)
         if not org:
-            raise NotFound("organization not found")
+            raise NotFound("user's organization not found")
         # if org != request.user.active_organization:
         #     raise PermissionDenied('You can delete members only for your current active organization')
 
-        user = get_object_or_404(User, pk=user_pk)
-        member = get_object_or_404(OrganizationMember, user=user, organization=org)
-        om_self = get_object_or_404(OrganizationMember, user=request.user, organization=org)
-        if member.deleted_at is not None:
+        user = get_object_or_404(User, pk=user_pk) #the One who is gonna be deleted
+        if not user:
+            raise NotFound('User not found')
+        
+        om = get_object_or_404(OrganizationMember, user__email=user.email, organization__id=org.id) # Member entity of the user_mustbe_deleted
+        if not om or om.deleted_at is not None:
             raise NotFound('Member not found')
 
-        if (not om_self or not om_self.is_admin ) and not user.is_superuser:
-            raise PermissionDenied('You can remove members from the organization that you are admin/owner in.')
-
-        if member.user_id == request.user.id:
+        om_self = get_object_or_404(OrganizationMember, user__email=self.request.user.email) #th eaction performer's membership
+        if om_self.deleted_at is not None:
+            raise NotFound('You are not admin of this organization')
+        
+        if om.user_id == self.request.user.id:
             return Response({'detail': 'User cannot soft delete self'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
+        
 
-        member.soft_delete()
+        if self.request.user.is_superuser:
+            if om.organization.id!=1:
+                om.organization = get_object_or_404(Organization,id=1)
+                om.save()
+            else:
+                om.soft_delete()
+        else:
+            if (om_self.organization.id == om.organization.id) and om_self.is_admin:
+                om.organization = get_object_or_404(Organization,id=1)
+                om.save()
+            else:
+                raise PermissionDenied('You can remove members from the organization that you are admin/owner in.')
+            
         return Response(status=204)  # 204 No Content is a common HTTP status for successful delete requests
 
 
@@ -399,7 +419,7 @@ class OrganizationAdminAPI(GetParentObjectMixin, generics.RetrieveDestroyAPIView
         om_self = get_object_or_404(OrganizationMember, user__id=self.request.user.id, organization__id=pk)
         if not om:
             raise PermissionDenied("organization not found")
-        if (not om_self or not om_self.is_admin) and not user.is_superuser:
+        if (not om_self or not om_self.is_admin) and not self.request.user.is_superuser:
             raise PermissionDenied('You can add admins only in the organizations you are admin/owner in')
 
         if om.deleted_at is not None:
@@ -450,30 +470,14 @@ class OrganizationMemberAddAPI(GetParentObjectMixin, generics.ListCreateAPIView,
     serializer_class = OrganizationMemberUserSerializer  # Assuming this is the right serializer
     http_method_names = ['post','put','get']
 
-    # def create(self, request, pk=None, user_pk=None):
-    #     org = self.get_parent_object()
-    #     if not org:
-    #         raise NotFound("organization not found")
-    #     # if org != request.user.active_organization:
-    #     #     raise PermissionDenied('You can delete members only for your current active organization')
-
-    #     user = get_object_or_404(User, pk=user_pk)
-    #     om_self = get_object_or_404(OrganizationMember, user=request.user, organization=org)
-    #     if user is None:
-    #         raise NotFound('Member not found')
-    #     if (not om_self or not om_self.is_admin) and not user.is_superuser:
-    #         raise PermissionDenied('You can add members to the organization that you are admin/owner in.')
-    #     new_om = OrganizationMember(user=user, organization=org)
-    #     new_om.save()
-    #     return Response(status=204)  # 204 No Content is a common HTTP status for successful delete requests
-    
     def put(self,request, pk=None, user_pk=None, *args, **kwargs):
-        # response = super(OrganizationMemberAddAPI, self).put(request, *args, **kwargs)
+        
         body = request.data
 
         om = get_object_or_404(OrganizationMember, user__id=user_pk, organization__id=pk)
-        if not om and om.deleted_at is not None:
+        if not om or om.deleted_at is not None:
             raise NotFound('Member not found')
+        
         
         if self.request.user.is_superuser:
             om_self = get_object_or_404(OrganizationMember, user__id=self.request.user.id, organization__id=1)
@@ -483,11 +487,7 @@ class OrganizationMemberAddAPI(GetParentObjectMixin, generics.ListCreateAPIView,
                 raise PermissionDenied('You can add member from only origin organization')
   
         if (not om_self or not om_self.is_admin) and not self.request.user.is_superuser:
-            raise PermissionDenied('Only admins of the organizations can add membersS')
-
-        # if om.user.id == request.user.id and om.is_owner:
-        #     return Response({'detail': 'cannot set self as admin'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-        
+            raise PermissionDenied('Only admins of the organizations can add members')
 
         org = get_object_or_404(Organization,id=body['id'])
         om.organization = org
