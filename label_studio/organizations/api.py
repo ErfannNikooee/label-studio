@@ -205,7 +205,7 @@ class OrganizationMemberDeleteAPI(GetParentObjectMixin, generics.RetrieveDestroy
                 om.organization = get_object_or_404(Organization,id=1)
                 om.save()
             else:
-                om.soft_delete()
+                om.delete()
         else:
             if (om_self.organization.id == om.organization.id) and om_self.is_admin:
                 om.organization = get_object_or_404(Organization,id=1)
