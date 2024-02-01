@@ -492,9 +492,11 @@ class OrganizationMemberAddAPI(GetParentObjectMixin, generics.ListCreateAPIView,
         return Response(status=204)  # 204 No Content is a common HTTP status for successful delete requests
     
     def put(self,request, pk=None, user_pk=None, *args, **kwargs):
-        response = super(OrganizationMemberAddAPI, self).put(request, *args, **kwargs)
+        # response = super(OrganizationMemberAddAPI, self).put(request, *args, **kwargs)
+        body = request.data
+
         om = get_object_or_404(OrganizationMember, user__id=user_pk, organization__id=pk)
-        om_self = get_object_or_404(OrganizationMember, user__id=self.request.user.id, organization__id=pk)
+        om_self = get_object_or_404(OrganizationMember, user__id=self.request.user.id, organization__id=body['id'])
         if not om:
             raise PermissionDenied("organization not found")
         if (not om_self or not om_self.is_admin) and not user.is_superuser:
@@ -506,14 +508,9 @@ class OrganizationMemberAddAPI(GetParentObjectMixin, generics.ListCreateAPIView,
         if om.user.id == request.user.id and om.is_owner:
             return Response({'detail': 'cannot set self as admin'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
         
-        if response.status_code == status.HTTP_200_OK:
-            # Access the created object from the response data
-            body = response.data
 
-            org = get_object_or_404(Organization,organization__id=body['id'])
-            om.organization = org
-            # new_om = OrganizationMember(user=self.request.user,
-            #                             organization=Organization.objects.get(id=created_object['id']))
-            om.save()
-        return response
+        org = get_object_or_404(Organization,id=body['id'])
+        om.organization = org
+        om.save()
+        return Response(status=204)
 
